@@ -10,9 +10,27 @@
 
 import { useState, useEffect, createContext, useContext, Component, ErrorInfo, ReactNode, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useParams, useLocation } from 'react-router-dom';
-import { auth, db, googleProvider, signInWithPopup, signOut, onAuthStateChanged, collection, doc, getDoc, setDoc, serverTimestamp, getDocFromServer, handleFirestoreError, OperationType } from './firebase';
+import { 
+  auth, 
+  db, 
+  googleProvider, 
+  signInWithPopup, 
+  signOut, 
+  onAuthStateChanged, 
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+  collection, 
+  doc, 
+  getDoc, 
+  setDoc, 
+  serverTimestamp, 
+  getDocFromServer, 
+  handleFirestoreError, 
+  OperationType 
+} from './firebase';
 import { User as FirebaseUser } from 'firebase/auth';
-import { Search, PlusCircle, MessageCircle, User as UserIcon, LogOut, Home, ShoppingBag, AlertTriangle } from 'lucide-react';
+import { Search, PlusCircle, MessageCircle, User as UserIcon, LogOut, Home, ShoppingBag, AlertTriangle, Mail, Lock, UserPlus, LogIn, X } from 'lucide-react';
 import { cn } from './lib/utils';
 
 // --- Error Boundary ---
@@ -188,10 +206,13 @@ function Navbar() {
               {isSigningIn ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span className="hidden sm:inline">Logging in...</span>
+                  <span className="hidden sm:inline">Connecting...</span>
                 </>
               ) : (
-                'Login'
+                <>
+                  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5 bg-white rounded-full p-0.5" alt="Google" />
+                  <span>Login with Google</span>
+                </>
               )}
             </button>
           )}
@@ -201,34 +222,96 @@ function Navbar() {
   );
 }
 
+function ProtectedRoute({ children }: { children: ReactNode }) {
+  const { user, loading, isSigningIn, signIn } = useAuth();
+
+  if (loading) return <PageLoader />;
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 sm:p-20 space-y-8 bg-white rounded-3xl shadow-sm border border-gray-100 max-w-2xl mx-auto my-10">
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center gap-3 text-blue-600 text-3xl font-extrabold tracking-tight">
+            <ShoppingBag className="w-10 h-10" />
+            MarketHub
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900">Login Required</h2>
+          <p className="text-gray-500 max-w-md">
+            Please sign in with your Google account to access this section and start buying or selling.
+          </p>
+        </div>
+
+        <button
+          onClick={signIn}
+          disabled={isSigningIn}
+          className="w-full max-w-xs bg-white border-2 border-gray-100 text-gray-700 py-4 rounded-2xl font-bold hover:bg-gray-50 hover:border-gray-200 transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-sm"
+        >
+          {isSigningIn ? (
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+          ) : (
+            <>
+              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-6 h-6" alt="Google" />
+              <span>Continue with Google</span>
+            </>
+          )}
+        </button>
+
+        <p className="text-[10px] text-center text-gray-400">
+          By continuing, you agree to MarketHub's Terms of Service and Privacy Policy.
+        </p>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}
+
 function BottomNav() {
-  const { user } = useAuth();
-  if (!user) return null;
+  const { user, signIn } = useAuth();
+  const navigate = useNavigate();
+
+  const guestLinkClass = "flex flex-col items-center gap-1 text-gray-500 hover:text-blue-600 transition-colors";
+
+  const NavItem = ({ to, icon: Icon, label, protected: isProtected }: { to: string, icon: any, label: string, protected?: boolean }) => {
+    const content = (
+      <>
+        <Icon className="w-6 h-6" />
+        <span className="text-[10px] font-medium">{label}</span>
+      </>
+    );
+
+    if (isProtected && !user) {
+      return (
+        <button onClick={signIn} className={guestLinkClass}>
+          {content}
+        </button>
+      );
+    }
+
+    return (
+      <Link to={to} className={guestLinkClass}>
+        {content}
+      </Link>
+    );
+  };
 
   return (
     <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-3 flex items-center justify-between z-50">
-      <Link to="/" className="flex flex-col items-center gap-1 text-gray-500 hover:text-blue-600">
-        <Home className="w-6 h-6" />
-        <span className="text-[10px] font-medium">Home</span>
-      </Link>
-      <Link to="/chats" className="flex flex-col items-center gap-1 text-gray-500 hover:text-blue-600">
-        <MessageCircle className="w-6 h-6" />
-        <span className="text-[10px] font-medium">Chats</span>
-      </Link>
-      <Link to="/sell" className="flex flex-col items-center gap-1 -mt-8">
-        <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg shadow-blue-200 border-4 border-white">
+      <NavItem to="/" icon={Home} label="Home" />
+      <NavItem to="/chats" icon={MessageCircle} label="Chats" protected />
+      
+      <div className="flex flex-col items-center gap-1 -mt-8">
+        <button 
+          onClick={() => user ? navigate('/sell') : signIn()}
+          className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg shadow-blue-200 border-4 border-white"
+        >
           <PlusCircle className="w-6 h-6" />
-        </div>
+        </button>
         <span className="text-[10px] font-medium text-blue-600 mt-1">Sell</span>
-      </Link>
-      <Link to="/my-ads" className="flex flex-col items-center gap-1 text-gray-500 hover:text-blue-600">
-        <ShoppingBag className="w-6 h-6" />
-        <span className="text-[10px] font-medium">My Ads</span>
-      </Link>
-      <Link to="/profile" className="flex flex-col items-center gap-1 text-gray-500 hover:text-blue-600">
-        <UserIcon className="w-6 h-6" />
-        <span className="text-[10px] font-medium">Profile</span>
-      </Link>
+      </div>
+
+      <NavItem to="/my-ads" icon={ShoppingBag} label="My Ads" protected />
+      <NavItem to="/profile" icon={UserIcon} label="Profile" protected />
     </div>
   );
 }
@@ -237,6 +320,7 @@ export default function App() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
     async function testConnection() {
@@ -284,11 +368,20 @@ export default function App() {
   const signIn = async () => {
     if (isSigningIn) return;
     setIsSigningIn(true);
+    setAuthError(null);
     try {
       await signInWithPopup(auth, googleProvider);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sign in error:', error);
-      // alert is not allowed, but we can log it
+      let message = 'An error occurred during sign in.';
+      if (error.code === 'auth/popup-closed-by-user') {
+        message = 'The sign-in popup was closed before completion. Please try again.';
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        message = 'Only one sign-in popup can be open at a time.';
+      } else if (error.code === 'auth/unauthorized-domain') {
+        message = 'This domain is not authorized for sign-in. Please check your Firebase Console settings.';
+      }
+      setAuthError(message);
     } finally {
       setIsSigningIn(false);
     }
@@ -307,6 +400,19 @@ export default function App() {
       <AuthContext.Provider value={{ user, loading, isSigningIn, signIn, logout }}>
         <Router>
           <ScrollToHash />
+          {authError && (
+            <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[60] w-full max-w-md px-4">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl shadow-lg flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-4">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 shrink-0" />
+                  <p className="text-sm font-medium">{authError}</p>
+                </div>
+                <button onClick={() => setAuthError(null)} className="p-1 hover:bg-red-100 rounded-full transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
           <div className="min-h-screen bg-gray-50 flex flex-col pb-20 sm:pb-0">
             <Navbar />
             <main className="flex-1 max-w-7xl mx-auto w-full p-4">
@@ -323,15 +429,15 @@ export default function App() {
                   <Routes>
                     <Route path="/" element={<HomeView />} />
                     <Route path="/product/:id" element={<ProductDetailsView />} />
-                    <Route path="/sell" element={<SellView />} />
-                    <Route path="/chats" element={<ChatsView />} />
-                    <Route path="/chats/:chatId" element={<ChatsView />} />
-                    <Route path="/my-ads" element={<MyAdsView />} />
+                    <Route path="/sell" element={<ProtectedRoute><SellView /></ProtectedRoute>} />
+                    <Route path="/chats" element={<ProtectedRoute><ChatsView /></ProtectedRoute>} />
+                    <Route path="/chats/:chatId" element={<ProtectedRoute><ChatsView /></ProtectedRoute>} />
+                    <Route path="/my-ads" element={<ProtectedRoute><MyAdsView /></ProtectedRoute>} />
                     <Route path="/about-us" element={<AboutUsView />} />
                     <Route path="/privacy-policy" element={<PrivacyPolicyView />} />
                     <Route path="/terms-and-conditions" element={<TermsAndConditionsView />} />
                     <Route path="/faq" element={<FAQView />} />
-                    <Route path="/profile" element={<ProfileView />} />
+                    <Route path="/profile" element={<ProtectedRoute><ProfileView /></ProtectedRoute>} />
                   </Routes>
                 </Suspense>
               )}
