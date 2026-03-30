@@ -1,0 +1,5 @@
+{
+  "name": "MarketHub",
+  "description": "A marketplace for buying and selling products with real-time chat between buyers and sellers.",
+  "requestFramePermissions": []
+}

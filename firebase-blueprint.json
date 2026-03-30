@@ -1,0 +1,133 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Unique user ID from Firebase Auth" },
+        "displayName": { "type": "string", "description": "User's display name" },
+        "email": { "type": "string", "description": "User's email address" },
+        "photoURL": { "type": "string", "description": "User's profile photo URL" },
+        "bio": { "type": "string", "description": "User's short biography" },
+        "phoneNumber": { "type": "string", "description": "User's contact phone number" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the user profile was created" }
+      },
+      "required": ["uid", "displayName", "email"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "A product listed for sale",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Product title" },
+        "description": { "type": "string", "description": "Product description" },
+        "price": { "type": "number", "description": "Product price" },
+        "category": { "type": "string", "description": "Product category" },
+        "images": { "type": "array", "items": { "type": "string" }, "description": "List of image URLs" },
+        "sellerId": { "type": "string", "description": "UID of the seller" },
+        "sellerName": { "type": "string", "description": "Name of the seller" },
+        "status": { "type": "string", "enum": ["active", "sold", "deleted"], "description": "Current status of the listing" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the listing was created" },
+        "seatingCapacity": { "type": "string", "enum": ["2 Seater", "4 Seater", "7 Seater"], "description": "Seating capacity for cars" },
+        "condition": { "type": "string", "enum": ["New", "Used"], "description": "Condition of the vehicle" },
+        "usedDuration": { "type": "string", "enum": ["1-30 Days", "1-12 Months", "1-5 Years"], "description": "Duration used if condition is Used" },
+        "propertyType": { "type": "string", "description": "Type of property" },
+        "propertyName": { "type": "string", "description": "Name or ownership of property" },
+        "offerType": { "type": "string", "enum": ["Sell", "Rent"], "description": "Whether to sell or rent" },
+        "propertyCondition": { "type": "string", "enum": ["New", "Old"], "description": "Condition of property" },
+        "propertyAge": { "type": "string", "description": "Age of property if old" },
+        "bhk": { "type": "string", "description": "BHK of property" },
+        "brand": { "type": "string", "description": "Mobile brand name" },
+        "mobileCondition": { "type": "string", "enum": ["New", "Old"], "description": "Condition of mobile" },
+        "mobileUsedDuration": { "type": "string", "enum": ["1-30 Days", "1-12 Months", "1-3 Years"], "description": "Duration used if mobile condition is Old" },
+        "quantity": { "type": "string", "description": "Quantity of items available" },
+        "companyName": { "type": "string", "description": "Name of the company" },
+        "jobAddress": { "type": "string", "description": "Work location address" },
+        "qualification": { "type": "string", "description": "Required qualification" },
+        "jobType": { "type": "string", "enum": ["Part Time", "Permanent"], "description": "Type of job" },
+        "benefits": { "type": "array", "items": { "type": "string" }, "description": "List of job benefits" },
+        "bikeBrand": { "type": "string", "description": "Bike brand name" },
+        "bikeCondition": { "type": "string", "enum": ["New", "Old"], "description": "Condition of bike" },
+        "bikeUsedDuration": { "type": "string", "enum": ["0-3 Months", "3-6 Months", "6-12 Months", "1-5 Years", "5-10 Years"], "description": "Duration used if bike condition is Old" },
+        "electronicsBrand": { "type": "string", "description": "Electronics brand name" },
+        "electronicsCondition": { "type": "string", "enum": ["New", "Old"], "description": "Condition of electronics" },
+        "electronicsUsedDuration": { "type": "string", "enum": ["1-7 days", "1-3 weeks", "1-2 Months", "2-6 Months"], "description": "Duration used if electronics condition is Old" },
+        "furnitureBrand": { "type": "string", "description": "Furniture brand name" },
+        "furnitureCondition": { "type": "string", "enum": ["New", "Old"], "description": "Condition of furniture" },
+        "furnitureUsedDuration": { "type": "string", "enum": ["0-3 days", "3-6 days", "6-15 days", "15-30 days", "1-3 Months"], "description": "Duration used if furniture condition is Old" },
+        "fashionGender": { "type": "string", "enum": ["Women", "Men", "Girls", "Boys", "Baby's", "Personal Care"], "description": "Gender category for fashion" },
+        "fashionSubcategory": { "type": "string", "description": "Subcategory for fashion (e.g., Clothing, Accessories)" },
+        "personalCareType": { "type": "string", "enum": ["Organic", "Mix Cosmetic"], "description": "Type of personal care product" },
+        "isKitProduct": { "type": "boolean", "description": "Whether the personal care product is a kit" },
+        "serviceCompanyName": { "type": "string", "description": "Name of the service company" },
+        "pricingModel": { "type": "string", "enum": ["Fixed", "Percentage"], "description": "Pricing model for the service" },
+        "serviceType": { "type": "string", "enum": ["Physical", "Online"], "description": "Type of service" }
+      },
+      "required": ["title", "description", "price", "category", "sellerId", "status"]
+    },
+    "Chat": {
+      "title": "Chat",
+      "description": "A chat session between a buyer and a seller",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "string", "description": "ID of the product being discussed" },
+        "productTitle": { "type": "string", "description": "Title of the product" },
+        "buyerId": { "type": "string", "description": "UID of the buyer" },
+        "sellerId": { "type": "string", "description": "UID of the seller" },
+        "lastMessage": { "type": "string", "description": "The most recent message in the chat" },
+        "lastMessageAt": { "type": "string", "format": "date-time", "description": "Timestamp of the last message" },
+        "participants": { "type": "array", "items": { "type": "string" }, "description": "List of UIDs of participants" }
+      },
+      "required": ["productId", "buyerId", "sellerId", "participants"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "A single message in a chat session",
+      "type": "object",
+      "properties": {
+        "chatId": { "type": "string", "description": "ID of the chat session" },
+        "senderId": { "type": "string", "description": "UID of the sender" },
+        "text": { "type": "string", "description": "The message text" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the message was sent" }
+      },
+      "required": ["chatId", "senderId", "text"]
+    },
+    "Favorite": {
+      "title": "Favorite",
+      "description": "A product favorited by a user",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "string", "description": "ID of the favorited product" },
+        "title": { "type": "string", "description": "Title of the product" },
+        "price": { "type": "number", "description": "Price of the product" },
+        "image": { "type": "string", "description": "URL of the product's main image" },
+        "category": { "type": "string", "description": "Category of the product" },
+        "addedAt": { "type": "string", "format": "date-time", "description": "When the product was favorited" }
+      },
+      "required": ["productId", "title", "price", "image", "category", "addedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/users/{userId}/favorites/{favoriteId}": {
+      "schema": "Favorite",
+      "description": "User's favorite products"
+    },
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Product listings"
+    },
+    "/chats/{chatId}": {
+      "schema": "Chat",
+      "description": "Chat sessions"
+    },
+    "/chats/{chatId}/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Messages within a chat session"
+    }
+  }
+}
