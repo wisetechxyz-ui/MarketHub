@@ -1,25 +1,40 @@
 import { initializeApp } from 'firebase/app';
 import { 
-  getAuth, 
-  GoogleAuthProvider, 
-  signInWithPopup, 
-  signOut, 
-  onAuthStateChanged,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  updateProfile
-} from 'firebase/auth';
-import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc, getDoc, getDocs, query, where, orderBy, onSnapshot, serverTimestamp, Timestamp, limit, getDocFromServer } from 'firebase/firestore';
+  initializeFirestore, 
+  collection, 
+  doc, 
+  addDoc, 
+  setDoc, 
+  updateDoc, 
+  deleteDoc, 
+  getDoc, 
+  getDocs, 
+  query, 
+  where, 
+  orderBy, 
+  onSnapshot, 
+  serverTimestamp, 
+  Timestamp, 
+  limit, 
+  getDocFromServer 
+} from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 
-console.log("Initializing Firebase with project ID:", firebaseConfig.projectId);
+console.log("Firebase Config Check:", {
+  projectId: firebaseConfig.projectId,
+  apiKey: firebaseConfig.apiKey ? "PRESENT" : "MISSING",
+  authDomain: firebaseConfig.authDomain,
+  databaseURL: (firebaseConfig as any).databaseURL
+});
+
 const app = initializeApp(firebaseConfig);
-export const db = (firebaseConfig as any).firestoreDatabaseId 
-  ? getFirestore(app, (firebaseConfig as any).firestoreDatabaseId)
-  : getFirestore(app);
-export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
-googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+// Use initializeFirestore with long polling for better connectivity in this environment
+export const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+  experimentalAutoDetectLongPolling: false,
+});
+console.log("Firestore initialized with long polling.");
 
 export enum OperationType {
   CREATE = 'create',
@@ -53,17 +68,12 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
   const errInfo: FirestoreErrorInfo = {
     error: error instanceof Error ? error.message : String(error),
     authInfo: {
-      userId: auth.currentUser?.uid,
-      email: auth.currentUser?.email,
-      emailVerified: auth.currentUser?.emailVerified,
-      isAnonymous: auth.currentUser?.isAnonymous,
-      tenantId: auth.currentUser?.tenantId,
-      providerInfo: auth.currentUser?.providerData.map(provider => ({
-        providerId: provider.providerId,
-        displayName: provider.displayName,
-        email: provider.email,
-        photoUrl: provider.photoURL
-      })) || []
+      userId: 'guest-user',
+      email: 'guest@example.com',
+      emailVerified: false,
+      isAnonymous: true,
+      tenantId: null,
+      providerInfo: []
     },
     operationType,
     path
@@ -73,12 +83,6 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
 }
 
 export {
-  signInWithPopup,
-  signOut,
-  onAuthStateChanged,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  updateProfile,
   collection,
   doc,
   addDoc,

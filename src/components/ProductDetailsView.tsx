@@ -8,7 +8,7 @@ import ReactMarkdown from 'react-markdown';
 
 export default function ProductDetailsView() {
   const { id } = useParams();
-  const { user, signIn, isSigningIn } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -36,7 +36,7 @@ export default function ProductDetailsView() {
 
   useEffect(() => {
     async function checkFavorite() {
-      if (!user || !id) return;
+      if (!id) return;
       try {
         const favRef = doc(db, 'users', user.uid, 'favorites', id);
         const favSnap = await getDoc(favRef);
@@ -49,10 +49,6 @@ export default function ProductDetailsView() {
   }, [user, id]);
 
   const handleFavorite = async () => {
-    if (!user) {
-      signIn();
-      return;
-    }
     if (!id || !product) return;
 
     setFavoriteLoading(true);
@@ -93,13 +89,6 @@ export default function ProductDetailsView() {
   };
 
   const handleChat = async () => {
-    if (!user) {
-      signIn();
-      return;
-    }
-
-    if (isSigningIn) return;
-
     if (user.uid === product.sellerId) {
       alert("You can't chat with yourself!");
       return;
@@ -524,20 +513,10 @@ export default function ProductDetailsView() {
           <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 sm:relative sm:p-0 sm:bg-transparent sm:border-none z-40">
             <button
               onClick={handleChat}
-              disabled={isSigningIn}
               className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white p-4 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSigningIn ? (
-                <>
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                  <span>Logging in...</span>
-                </>
-              ) : (
-                <>
-                  <MessageCircle className="w-6 h-6" />
-                  Chat with Seller
-                </>
-              )}
+              <MessageCircle className="w-6 h-6" />
+              Chat with Seller
             </button>
           </div>
         </div>
@@ -569,7 +548,7 @@ function SimilarProducts({ category, currentProductId }: { category: string, cur
           .map(doc => ({ id: doc.id, ...doc.data() }))
           .filter(p => p.id !== currentProductId);
         setProducts(filtered);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching similar products:', error);
       } finally {
         setLoading(false);
@@ -582,9 +561,11 @@ function SimilarProducts({ category, currentProductId }: { category: string, cur
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">Fresh Recommendations in {category}</h2>
-        <Link to={`/?category=${category}`} className="text-blue-600 font-semibold hover:underline">View all</Link>
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-gray-900">Fresh Recommendations in {category}</h2>
+          <Link to={`/?category=${category}`} className="text-blue-600 font-semibold hover:underline">View all</Link>
+        </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         {products.map(p => (

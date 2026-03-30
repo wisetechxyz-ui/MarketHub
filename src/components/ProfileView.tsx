@@ -6,7 +6,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 
 export default function ProfileView() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<any>(user ? {
     uid: user.uid,
@@ -29,11 +29,6 @@ export default function ProfileView() {
   const [activeTab, setActiveTab] = useState<'about' | 'favorites'>('about');
 
   useEffect(() => {
-    if (!user) {
-      navigate('/');
-      return;
-    }
-
     async function fetchProfile() {
       try {
         const userRef = doc(db, 'users', user.uid);
@@ -46,7 +41,7 @@ export default function ProfileView() {
             bio: data.bio || '',
             phoneNumber: data.phoneNumber || ''
           });
-        } else if (user) {
+        } else {
           // If doc doesn't exist, we use the auth user data
           setProfile({
             uid: user.uid,
@@ -116,7 +111,7 @@ export default function ProfileView() {
     );
   }
 
-  if (!profile && !user) return null;
+  if (!profile) return null;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -228,7 +223,7 @@ export default function ProfileView() {
                 <span>My Messages</span>
               </button>
               <button 
-                onClick={logout}
+                onClick={() => alert('Logout is disabled in guest mode.')}
                 className="w-full flex items-center gap-3 p-3 hover:bg-red-50 rounded-xl transition-colors text-red-600"
               >
                 <LogOut className="w-5 h-5" />

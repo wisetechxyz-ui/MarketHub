@@ -8,30 +8,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, createContext, useContext, Component, ErrorInfo, ReactNode, lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useState, useEffect, Component, ErrorInfo, ReactNode, lazy, Suspense } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
-  auth, 
   db, 
-  googleProvider, 
-  signInWithPopup, 
-  signOut, 
-  onAuthStateChanged, 
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  updateProfile,
   collection, 
   doc, 
   getDoc, 
-  setDoc, 
-  serverTimestamp, 
   getDocFromServer, 
   handleFirestoreError, 
   OperationType 
 } from './firebase';
-import { User as FirebaseUser } from 'firebase/auth';
-import { Search, PlusCircle, MessageCircle, User as UserIcon, LogOut, Home, ShoppingBag, AlertTriangle, Mail, Lock, UserPlus, LogIn, X, AlertCircle, RefreshCw } from 'lucide-react';
+import { Search, PlusCircle, MessageCircle, User as UserIcon, Home, ShoppingBag, AlertTriangle, X, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from './lib/utils';
+import firebaseConfig from '../firebase-applet-config.json';
+
+// --- Mock User for Guest Access ---
+const GUEST_USER = {
+  uid: 'guest-user',
+  displayName: 'Guest User',
+  email: 'guest@example.com',
+  photoURL: 'https://ui-avatars.com/api/?name=Guest+User&background=random'
+};
 
 // --- Error Boundary ---
 interface ErrorBoundaryProps {
@@ -90,21 +88,15 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 }
 
-// --- Context ---
-interface AuthContextType {
-  user: FirebaseUser | null;
-  loading: boolean;
-  isSigningIn: boolean;
-  signIn: () => Promise<void>;
-  logout: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
+// --- Dummy useAuth for compatibility ---
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within an AuthProvider');
-  return context;
+  return {
+    user: GUEST_USER,
+    loading: false,
+    isSigningIn: false,
+    signIn: async () => {},
+    logout: async () => {},
+  };
 }
 
 // --- Components (Lazy Loaded) ---
@@ -149,7 +141,6 @@ function ScrollToHash() {
 }
 
 function Navbar() {
-  const { user, loading, isSigningIn, signIn } = useAuth();
   const navigate = useNavigate();
 
   return (
@@ -170,139 +161,53 @@ function Navbar() {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4">
-          {loading ? (
-            <div className="w-8 h-8 sm:w-10 h-10 rounded-full bg-gray-100 animate-pulse" />
-          ) : user ? (
-            <>
-              <Link to="/chats" className="hidden sm:flex p-2 hover:bg-gray-100 rounded-full transition-colors relative">
-                <MessageCircle className="w-6 h-6 text-gray-600" />
-              </Link>
-              <Link to="/my-ads" className="hidden md:flex items-center gap-2 px-3 py-1.5 hover:bg-gray-100 rounded-lg transition-colors">
-                <UserIcon className="w-5 h-5 text-gray-600" />
-                <span className="text-sm font-medium">My Ads</span>
-              </Link>
-              <Link to="/profile" className="w-8 h-8 sm:w-10 h-10 rounded-full overflow-hidden border-2 border-transparent hover:border-blue-500 transition-all shrink-0">
-                <img 
-                  src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}&background=random`} 
-                  alt={user.displayName || 'User'} 
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-              </Link>
-              <button
-                onClick={() => navigate('/sell')}
-                className="hidden sm:flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-              >
-                <PlusCircle className="w-5 h-5" />
-                <span className="hidden lg:inline">Sell</span>
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={signIn}
-              disabled={isSigningIn}
-              className="bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {isSigningIn ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span className="hidden sm:inline">Connecting...</span>
-                </>
-              ) : (
-                <>
-                  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5 bg-white rounded-full p-0.5" alt="Google" />
-                  <span>Login with Google</span>
-                </>
-              )}
-            </button>
-          )}
+          <Link to="/chats" className="hidden sm:flex p-2 hover:bg-gray-100 rounded-full transition-colors relative">
+            <MessageCircle className="w-6 h-6 text-gray-600" />
+          </Link>
+          <Link to="/my-ads" className="hidden md:flex items-center gap-2 px-3 py-1.5 hover:bg-gray-100 rounded-lg transition-colors">
+            <UserIcon className="w-5 h-5 text-gray-600" />
+            <span className="text-sm font-medium">My Ads</span>
+          </Link>
+          <Link to="/profile" className="w-8 h-8 sm:w-10 h-10 rounded-full overflow-hidden border-2 border-transparent hover:border-blue-500 transition-all shrink-0">
+            <img 
+              src={GUEST_USER.photoURL} 
+              alt={GUEST_USER.displayName} 
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+          </Link>
+          <button
+            onClick={() => navigate('/sell')}
+            className="hidden sm:flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+          >
+            <PlusCircle className="w-5 h-5" />
+            <span className="hidden lg:inline">Sell</span>
+          </button>
         </div>
       </div>
     </nav>
   );
 }
 
-function ProtectedRoute({ children }: { children: ReactNode }) {
-  const { user, loading, isSigningIn, signIn } = useAuth();
-
-  if (loading) return <PageLoader />;
-
-  if (!user) {
-    return (
-      <div className="flex flex-col items-center justify-center p-8 sm:p-20 space-y-8 bg-white rounded-3xl shadow-sm border border-gray-100 max-w-2xl mx-auto my-10">
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center gap-3 text-blue-600 text-3xl font-extrabold tracking-tight">
-            <ShoppingBag className="w-10 h-10" />
-            The Market Hub
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900">Login Required</h2>
-          <p className="text-gray-500 max-w-md">
-            Please sign in with your Google account to access this section and start buying or selling.
-          </p>
-        </div>
-
-        <button
-          onClick={signIn}
-          disabled={isSigningIn}
-          className="w-full max-w-xs bg-white border-2 border-gray-100 text-gray-700 py-4 rounded-2xl font-bold hover:bg-gray-50 hover:border-gray-200 transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-sm"
-        >
-          {isSigningIn ? (
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-          ) : (
-            <>
-              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-6 h-6" alt="Google" />
-              <span>Continue with Google</span>
-            </>
-          )}
-        </button>
-
-        <p className="text-[10px] text-center text-gray-400">
-          By continuing, you agree to The Market Hub's Terms of Service and Privacy Policy.
-        </p>
-      </div>
-    );
-  }
-
-  return <>{children}</>;
-}
-
 function BottomNav() {
-  const { user, signIn } = useAuth();
   const navigate = useNavigate();
+  const linkClass = "flex flex-col items-center gap-1 text-gray-500 hover:text-blue-600 transition-colors";
 
-  const guestLinkClass = "flex flex-col items-center gap-1 text-gray-500 hover:text-blue-600 transition-colors";
-
-  const NavItem = ({ to, icon: Icon, label, protected: isProtected }: { to: string, icon: any, label: string, protected?: boolean }) => {
-    const content = (
-      <>
-        <Icon className="w-6 h-6" />
-        <span className="text-[10px] font-medium">{label}</span>
-      </>
-    );
-
-    if (isProtected && !user) {
-      return (
-        <button onClick={signIn} className={guestLinkClass}>
-          {content}
-        </button>
-      );
-    }
-
-    return (
-      <Link to={to} className={guestLinkClass}>
-        {content}
-      </Link>
-    );
-  };
+  const NavItem = ({ to, icon: Icon, label }: { to: string, icon: any, label: string }) => (
+    <Link to={to} className={linkClass}>
+      <Icon className="w-6 h-6" />
+      <span className="text-[10px] font-medium">{label}</span>
+    </Link>
+  );
 
   return (
     <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-3 flex items-center justify-between z-50">
       <NavItem to="/" icon={Home} label="Home" />
-      <NavItem to="/chats" icon={MessageCircle} label="Chats" protected />
+      <NavItem to="/chats" icon={MessageCircle} label="Chats" />
       
       <div className="flex flex-col items-center gap-1 -mt-8">
         <button 
-          onClick={() => user ? navigate('/sell') : signIn()}
+          onClick={() => navigate('/sell')}
           className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg shadow-blue-200 border-4 border-white"
         >
           <PlusCircle className="w-6 h-6" />
@@ -310,168 +215,117 @@ function BottomNav() {
         <span className="text-[10px] font-medium text-blue-600 mt-1">Sell</span>
       </div>
 
-      <NavItem to="/my-ads" icon={ShoppingBag} label="My Ads" protected />
-      <NavItem to="/profile" icon={UserIcon} label="Profile" protected />
+      <NavItem to="/my-ads" icon={ShoppingBag} label="My Ads" />
+      <NavItem to="/profile" icon={UserIcon} label="Profile" />
     </div>
   );
 }
 
 export default function App() {
-  const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isSigningIn, setIsSigningIn] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
-  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [connectionError, setConnectionError] = useState<{ message: string | React.ReactNode, isCritical: boolean } | null>(null);
+
+  const testConnection = async () => {
+    try {
+      await getDocFromServer(doc(db, 'test', 'connection'));
+      setConnectionError(null);
+    } catch (error: any) {
+      if (error.message?.includes('the client is offline')) {
+        const msg = (
+          <div className="space-y-4">
+            <p className="text-sm opacity-90">
+              The app is "offline" because it cannot reach your Firestore database.
+            </p>
+            <div className="bg-white/10 p-4 rounded-xl space-y-3 text-sm border border-white/20">
+              <p className="font-bold underline">Follow these steps to fix it:</p>
+              <ol className="list-decimal ml-4 space-y-2">
+                <li>
+                  Open your <a href={`https://console.firebase.google.com/project/${firebaseConfig.projectId}/firestore`} target="_blank" rel="noopener noreferrer" className="underline font-bold hover:text-blue-200 decoration-2 underline-offset-2">Firebase Console here</a>.
+                </li>
+                <li>
+                  If you see a <strong>"Create Database"</strong> button, click it. Choose <strong>"Start in test mode"</strong>.
+                </li>
+              </ol>
+            </div>
+          </div>
+        );
+        setConnectionError({ message: msg, isCritical: true });
+      } else {
+        setConnectionError({ message: error.message || "Unknown connection error", isCritical: false });
+      }
+    }
+  };
 
   useEffect(() => {
-    async function testConnection() {
-      try {
-        await getDocFromServer(doc(db, 'test', 'connection'));
-        console.log("Firebase connection successful.");
-        setConnectionError(null);
-      } catch (error: any) {
-        console.error("Firebase Connection Test Failed:", error);
-        if (error.message?.includes('the client is offline')) {
-          const msg = "CRITICAL: The client is offline. This usually means the Firestore database has not been created in the Firebase Console for project 'themarkethub-8f1ed', or the API key/project ID is incorrect.";
-          console.error(msg);
-          setConnectionError(msg);
-        } else {
-          setConnectionError(error.message || "Unknown connection error");
-        }
-      }
-    }
     testConnection();
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        // Set user immediately for UI responsiveness
-        setUser(user);
-        setLoading(false);
-
-        // Background profile sync
-        try {
-          const userRef = doc(db, 'users', user.uid);
-          const userSnap = await getDoc(userRef);
-          if (!userSnap.exists()) {
-            await setDoc(userRef, {
-              uid: user.uid,
-              displayName: user.displayName,
-              email: user.email,
-              photoURL: user.photoURL,
-              createdAt: serverTimestamp()
-            });
-          }
-        } catch (error) {
-          console.error("Profile sync error:", error);
-          // We don't block the UI if profile sync fails
-        }
-      } else {
-        setUser(null);
-        setLoading(false);
-      }
-    });
-    return unsubscribe;
+    const interval = setInterval(testConnection, 15000);
+    return () => clearInterval(interval);
   }, []);
-
-  const signIn = async () => {
-    if (isSigningIn) return;
-    setIsSigningIn(true);
-    setAuthError(null);
-    try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (error: any) {
-      console.error('Sign in error:', error);
-      let message = 'An error occurred during sign in.';
-      if (error.code === 'auth/popup-closed-by-user') {
-        message = 'The sign-in popup was closed before completion. Please try again.';
-      } else if (error.code === 'auth/cancelled-popup-request') {
-        message = 'Only one sign-in popup can be open at a time.';
-      } else if (error.code === 'auth/unauthorized-domain') {
-        message = 'This domain is not authorized for sign-in. Please check your Firebase Console settings.';
-      }
-      setAuthError(message);
-    } finally {
-      setIsSigningIn(false);
-    }
-  };
-
-  const logout = async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
 
   return (
     <ErrorBoundary>
-      <AuthContext.Provider value={{ user, loading, isSigningIn, signIn, logout }}>
-        <Router>
-          <ScrollToHash />
-          {authError && (
-            <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[60] w-full max-w-md px-4">
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl shadow-lg flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-4">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 shrink-0" />
-                  <p className="text-sm font-medium">{authError}</p>
+      <Router>
+        <ScrollToHash />
+        <div className="min-h-screen bg-gray-50 flex flex-col pb-20 sm:pb-0">
+          {connectionError && (
+            connectionError.isCritical ? (
+              <div className="fixed inset-0 z-[200] flex items-center justify-center bg-gray-900/95 backdrop-blur-sm p-4 sm:p-6">
+                <div className="bg-red-600 text-white rounded-3xl p-6 sm:p-10 max-w-2xl w-full shadow-2xl border border-white/20 animate-in zoom-in duration-300">
+                  <div className="flex flex-col items-center text-center gap-6">
+                    <div className="bg-white/20 p-4 rounded-full">
+                      <AlertCircle className="w-12 h-12" />
+                    </div>
+                    <div className="space-y-2">
+                      <h2 className="text-2xl sm:text-3xl font-bold">Firestore Connection Failed</h2>
+                      <p className="text-red-100 font-medium">Your database is currently unreachable</p>
+                    </div>
+                    <div className="text-left w-full">{connectionError.message}</div>
+                    <div className="flex flex-col sm:flex-row gap-3 w-full pt-4">
+                      <button onClick={() => testConnection()} className="flex-1 flex items-center justify-center gap-2 bg-white text-red-600 hover:bg-red-50 px-6 py-4 rounded-2xl transition-all font-bold text-lg shadow-lg">
+                        <RefreshCw className="w-5 h-5" /> Retry Connection
+                      </button>
+                      <button onClick={() => window.location.reload()} className="flex-1 flex items-center justify-center gap-2 bg-red-700 text-white hover:bg-red-800 px-6 py-4 rounded-2xl transition-all font-bold text-lg border border-white/10">
+                        Reload Page
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <button onClick={() => setAuthError(null)} className="p-1 hover:bg-red-100 rounded-full transition-colors">
-                  <X className="w-4 h-4" />
-                </button>
               </div>
-            </div>
-          )}
-          <div className="min-h-screen bg-gray-50 flex flex-col pb-20 sm:pb-0">
-            {connectionError && (
+            ) : (
               <div className="bg-red-600 text-white p-3 text-center text-xs sm:text-sm font-medium sticky top-0 z-[100] animate-in fade-in slide-in-from-top duration-300">
                 <div className="max-w-7xl mx-auto flex items-center justify-center gap-2">
                   <AlertCircle className="w-4 h-4 sm:w-5 h-5 shrink-0" />
-                  <span>{connectionError}</span>
-                  <button 
-                    onClick={() => window.location.reload()}
-                    className="ml-2 sm:ml-4 flex items-center gap-1 bg-white/20 hover:bg-white/30 px-2 py-1 rounded transition-colors font-bold"
-                  >
-                    <RefreshCw className="w-3 h-3 sm:w-4 h-4" />
-                    Retry
+                  <span>{typeof connectionError.message === 'string' ? connectionError.message : 'Connection issue detected'}</span>
+                  <button onClick={() => testConnection()} className="ml-2 sm:ml-4 flex items-center gap-1 bg-white/20 hover:bg-white/30 px-2 py-1 rounded transition-colors font-bold">
+                    <RefreshCw className="w-3 h-3 sm:w-4 h-4" /> Retry
                   </button>
                 </div>
               </div>
-            )}
-            <Navbar />
-            <main className="flex-1 max-w-7xl mx-auto w-full p-4">
-              {loading ? (
-                <div className="flex flex-col items-center justify-center p-20 space-y-6">
-                  <div className="flex items-center gap-3 text-blue-600 text-3xl font-extrabold tracking-tight">
-                    <ShoppingBag className="w-10 h-10" />
-                    The Market Hub
-                  </div>
-                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-100 border-t-blue-600"></div>
-                </div>
-              ) : (
-                <Suspense fallback={<PageLoader />}>
-                  <Routes>
-                    <Route path="/" element={<HomeView />} />
-                    <Route path="/product/:id" element={<ProductDetailsView />} />
-                    <Route path="/sell" element={<ProtectedRoute><SellView /></ProtectedRoute>} />
-                    <Route path="/chats" element={<ProtectedRoute><ChatsView /></ProtectedRoute>} />
-                    <Route path="/chats/:chatId" element={<ProtectedRoute><ChatsView /></ProtectedRoute>} />
-                    <Route path="/my-ads" element={<ProtectedRoute><MyAdsView /></ProtectedRoute>} />
-                    <Route path="/about-us" element={<AboutUsView />} />
-                    <Route path="/privacy-policy" element={<PrivacyPolicyView />} />
-                    <Route path="/terms-and-conditions" element={<TermsAndConditionsView />} />
-                    <Route path="/faq" element={<FAQView />} />
-                    <Route path="/profile" element={<ProtectedRoute><ProfileView /></ProtectedRoute>} />
-                  </Routes>
-                </Suspense>
-              )}
-            </main>
-            <BottomNav />
-            <Suspense fallback={null}>
-              <Footer />
+            )
+          )}
+          <Navbar />
+          <main className="flex-1 max-w-7xl mx-auto w-full p-4">
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<HomeView />} />
+                <Route path="/product/:id" element={<ProductDetailsView />} />
+                <Route path="/sell" element={<SellView />} />
+                <Route path="/chats" element={<ChatsView />} />
+                <Route path="/chats/:chatId" element={<ChatsView />} />
+                <Route path="/my-ads" element={<MyAdsView />} />
+                <Route path="/about-us" element={<AboutUsView />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicyView />} />
+                <Route path="/terms-and-conditions" element={<TermsAndConditionsView />} />
+                <Route path="/faq" element={<FAQView />} />
+                <Route path="/profile" element={<ProfileView />} />
+              </Routes>
             </Suspense>
-          </div>
-        </Router>
-      </AuthContext.Provider>
+          </main>
+          <BottomNav />
+          <Suspense fallback={null}>
+            <Footer />
+          </Suspense>
+        </div>
+      </Router>
     </ErrorBoundary>
   );
 }

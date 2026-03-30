@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { db, collection, getDocs, query, where, orderBy, limit, handleFirestoreError, OperationType } from '../firebase';
+import { db, collection, getDocs, query, where, limit, handleFirestoreError, OperationType } from '../firebase';
 import { Tag, MapPin, Clock, Search, SlidersHorizontal, X } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '../lib/utils';
@@ -31,8 +31,7 @@ export default function HomeView() {
         let q = query(
           collection(db, 'products'),
           where('status', '==', 'active'),
-          orderBy('createdAt', 'desc'),
-          limit(20)
+          limit(50)
         );
 
         if (selectedCategory) {
@@ -40,8 +39,7 @@ export default function HomeView() {
             collection(db, 'products'),
             where('status', '==', 'active'),
             where('category', '==', selectedCategory),
-            orderBy('createdAt', 'desc'),
-            limit(20)
+            limit(50)
           );
         }
 
@@ -50,43 +48,17 @@ export default function HomeView() {
           id: doc.id,
           ...doc.data()
         }));
+
+        // Sort in memory by newest first by default
+        productsData.sort((a, b) => {
+          const dateA = a.createdAt?.toMillis?.() || a.createdAt?.seconds || 0;
+          const dateB = b.createdAt?.toMillis?.() || b.createdAt?.seconds || 0;
+          return dateB - dateA;
+        });
+
         setProducts(productsData);
       } catch (error: any) {
-        console.error('Error fetching products:', error);
-        // Fallback if index is missing
-        if (error.message?.includes('index') || error.code === 'failed-precondition') {
-          try {
-            let q = query(
-              collection(db, 'products'),
-              where('status', '==', 'active'),
-              limit(20)
-            );
-            if (selectedCategory) {
-              q = query(
-                collection(db, 'products'),
-                where('status', '==', 'active'),
-                where('category', '==', selectedCategory),
-                limit(20)
-              );
-            }
-            const querySnapshot = await getDocs(q);
-            const productsData: any[] = querySnapshot.docs.map(doc => ({
-              id: doc.id,
-              ...doc.data()
-            }));
-            // Sort in memory
-            productsData.sort((a, b) => {
-              const dateA = a.createdAt?.toMillis() || 0;
-              const dateB = b.createdAt?.toMillis() || 0;
-              return dateB - dateA;
-            });
-            setProducts(productsData);
-          } catch (innerError) {
-            handleFirestoreError(innerError, OperationType.LIST, 'products');
-          }
-        } else {
-          handleFirestoreError(error, OperationType.LIST, 'products');
-        }
+        handleFirestoreError(error, OperationType.LIST, 'products');
       } finally {
         setLoading(false);
       }
@@ -236,7 +208,11 @@ export default function HomeView() {
 
       {/* Product Grid */}
       <div id="products">
-        <h2 className="text-2xl font-bold mb-6">Fresh recommendations</h2>
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">Fresh recommendations</h2>
+          </div>
+        </div>
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {[...Array(8)].map((_, i) => (

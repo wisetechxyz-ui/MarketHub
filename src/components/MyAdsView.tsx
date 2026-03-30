@@ -13,8 +13,6 @@ export default function MyAdsView() {
   const [showConfirmModal, setShowConfirmModal] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) return;
-
     async function fetchMyProducts() {
       try {
         const q = query(
@@ -58,14 +56,6 @@ export default function MyAdsView() {
       handleFirestoreError(error, OperationType.UPDATE, `products/${id}`);
     }
   };
-
-  if (!user) {
-    return (
-      <div className="text-center py-20">
-        <h2 className="text-2xl font-bold">Please login to view your ads</h2>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-8">

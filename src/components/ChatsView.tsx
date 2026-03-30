@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { db, collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, doc, updateDoc } from '../firebase';
+import { db, collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, updateDoc } from '../firebase';
 import { useAuth } from '../App';
 import { Send, User, ChevronLeft, Search, MoreVertical, Phone, Video, MessageCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -20,12 +20,9 @@ export default function ChatsView() {
   };
 
   useEffect(() => {
-    if (!user) return;
-
     const q = query(
       collection(db, 'chats'),
-      where('participants', 'array-contains', user.uid),
-      orderBy('lastMessageAt', 'desc')
+      where('participants', 'array-contains', user.uid)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -33,7 +30,18 @@ export default function ChatsView() {
         id: doc.id,
         ...doc.data()
       }));
+      
+      // Sort in memory by lastMessageAt desc
+      chatsData.sort((a, b) => {
+        const dateA = a.lastMessageAt?.toMillis?.() || a.lastMessageAt?.seconds || 0;
+        const dateB = b.lastMessageAt?.toMillis?.() || b.lastMessageAt?.seconds || 0;
+        return dateB - dateA;
+      });
+
       setChats(chatsData);
+      setLoading(false);
+    }, (error: any) => {
+      console.error('Error fetching chats:', error);
       setLoading(false);
     });
 
@@ -41,11 +49,10 @@ export default function ChatsView() {
   }, [user]);
 
   useEffect(() => {
-    if (!chatId || !user) return;
+    if (!chatId) return;
 
     const q = query(
-      collection(db, 'chats', chatId, 'messages'),
-      orderBy('createdAt', 'asc')
+      collection(db, 'chats', chatId, 'messages')
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -53,6 +60,14 @@ export default function ChatsView() {
         id: doc.id,
         ...doc.data()
       }));
+
+      // Sort in memory by createdAt asc
+      messagesData.sort((a, b) => {
+        const dateA = a.createdAt?.toMillis?.() || a.createdAt?.seconds || 0;
+        const dateB = b.createdAt?.toMillis?.() || b.createdAt?.seconds || 0;
+        return dateA - dateB;
+      });
+
       setMessages(messagesData);
       setTimeout(scrollToBottom, 100);
     });
@@ -62,7 +77,7 @@ export default function ChatsView() {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !chatId || !user) return;
+    if (!newMessage.trim() || !chatId) return;
 
     const messageText = newMessage.trim();
     setNewMessage('');
@@ -86,20 +101,13 @@ export default function ChatsView() {
 
   const activeChat = chats.find(c => c.id === chatId);
 
-  if (!user) {
-    return (
-      <div className="text-center py-20">
-        <h2 className="text-2xl font-bold">Please login to view chats</h2>
-      </div>
-    );
-  }
-
   return (
     <div className="h-[calc(100vh-120px)] flex bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
       {/* Sidebar: Chat List */}
       <div className={`w-full md:w-80 border-r border-gray-100 flex flex-col ${chatId ? 'hidden md:flex' : 'flex'}`}>
         <div className="p-4 border-b border-gray-100 space-y-4">
           <h2 className="text-xl font-bold">Chats</h2>
+          <IndexErrorAlert errorLink={indexError} className="mb-2" />
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input

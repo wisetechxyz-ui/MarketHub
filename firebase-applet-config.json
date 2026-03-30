@@ -1,6 +1,7 @@
 {
   "apiKey": "AIzaSyDdQcFMi3Ig_8P2ol3PUSHnJjGXmF546qs",
   "authDomain": "themarkethub-8f1ed.firebaseapp.com",
+  "databaseURL": "https://themarkethub-8f1ed-default-rtdb.asia-southeast1.firebasedatabase.app",
   "projectId": "themarkethub-8f1ed",
   "storageBucket": "themarkethub-8f1ed.firebasestorage.app",
   "messagingSenderId": "796089244616",

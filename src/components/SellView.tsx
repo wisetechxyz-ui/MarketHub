@@ -10,7 +10,7 @@ const CATEGORIES = [
 ];
 
 export default function SellView() {
-  const { user, signIn } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -91,10 +91,6 @@ export default function SellView() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-      signIn();
-      return;
-    }
 
     if (!formData.category) {
       alert('Please select a category');
