@@ -9,10 +9,10 @@ export default function AboutUsView() {
           <ShoppingBag className="w-8 h-8" />
         </div>
         <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight">
-          About Us – <span className="text-blue-600">MarketHub</span>
+          About Us – <span className="text-blue-600">The Market Hub</span>
         </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          Welcome to MarketHub, a modern and trusted marketplace designed to simplify buying and selling for everyone.
+          Welcome to The Market Hub, a modern and trusted marketplace designed to simplify buying and selling for everyone.
         </p>
       </div>
 
@@ -20,13 +20,13 @@ export default function AboutUsView() {
       <div className="bg-white rounded-3xl border border-gray-200 p-8 sm:p-12 shadow-sm space-y-8">
         <div className="prose prose-blue max-w-none text-gray-600 leading-relaxed space-y-6">
           <p>
-            MarketHub was founded with a clear vision — to create a platform where people can easily connect, trade, and grow without unnecessary complications. Whether you're looking to sell products or find great deals, MarketHub provides a seamless and secure experience.
+            The Market Hub was founded with a clear vision — to create a platform where people can easily connect, trade, and grow without unnecessary complications. Whether you're looking to sell products or find great deals, The Market Hub provides a seamless and secure experience.
           </p>
           <p>
-            Our platform bridges the gap between buyers and sellers by offering a user-friendly interface, fast listing process, and a growing community of trusted users. From everyday items to valuable deals, MarketHub is built to make transactions simple, transparent, and efficient.
+            Our platform bridges the gap between buyers and sellers by offering a user-friendly interface, fast listing process, and a growing community of trusted users. From everyday items to valuable deals, The Market Hub is built to make transactions simple, transparent, and efficient.
           </p>
           <p>
-            At MarketHub, we believe that trust and convenience are the foundation of any successful marketplace. That’s why we continuously work on improving safety features, reducing fraud, and ensuring that every user has a smooth experience.
+            At The Market Hub, we believe that trust and convenience are the foundation of any successful marketplace. That’s why we continuously work on improving safety features, reducing fraud, and ensuring that every user has a smooth experience.
           </p>
         </div>
 
@@ -60,7 +60,7 @@ export default function AboutUsView() {
             </div>
             <div className="text-center sm:text-left space-y-2">
               <p className="text-gray-600 italic leading-relaxed">
-                MarketHub is proudly founded by <span className="font-bold text-gray-900">Sachin Kamat (Founder & CEO)</span>, who aims to revolutionize the online marketplace industry with innovation, trust, and simplicity.
+                The Market Hub is proudly founded by <span className="font-bold text-gray-900">Sachin Kamat (Founder & CEO)</span>, who aims to revolutionize the online marketplace industry with innovation, trust, and simplicity.
               </p>
               <p className="text-blue-600 font-bold">Join us and be a part of the future of digital commerce.</p>
             </div>
@@ -72,7 +72,7 @@ export default function AboutUsView() {
       <div className="text-center pt-8">
         <div className="h-px bg-gray-200 w-24 mx-auto mb-8"></div>
         <p className="text-2xl font-bold text-gray-900">
-          MarketHub – <span className="text-blue-600">Buy Smart. Sell Easy.</span>
+          The Market Hub – <span className="text-blue-600">Buy Smart. Sell Easy.</span>
         </p>
       </div>
     </div>

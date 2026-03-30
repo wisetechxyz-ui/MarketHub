@@ -30,7 +30,7 @@ import {
   OperationType 
 } from './firebase';
 import { User as FirebaseUser } from 'firebase/auth';
-import { Search, PlusCircle, MessageCircle, User as UserIcon, LogOut, Home, ShoppingBag, AlertTriangle, Mail, Lock, UserPlus, LogIn, X } from 'lucide-react';
+import { Search, PlusCircle, MessageCircle, User as UserIcon, LogOut, Home, ShoppingBag, AlertTriangle, Mail, Lock, UserPlus, LogIn, X, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from './lib/utils';
 
 // --- Error Boundary ---
@@ -157,7 +157,7 @@ function Navbar() {
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         <Link to="/" className="flex items-center gap-2 text-xl sm:text-2xl font-bold text-blue-600 shrink-0">
           <ShoppingBag className="w-6 h-6 sm:w-8 h-8" />
-          <span className="hidden xs:inline">MarketHub</span>
+          <span className="hidden xs:inline">The Market Hub</span>
         </Link>
 
         <div className="flex-1 max-w-2xl relative">
@@ -233,7 +233,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-3 text-blue-600 text-3xl font-extrabold tracking-tight">
             <ShoppingBag className="w-10 h-10" />
-            MarketHub
+            The Market Hub
           </div>
           <h2 className="text-2xl font-bold text-gray-900">Login Required</h2>
           <p className="text-gray-500 max-w-md">
@@ -257,7 +257,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
         </button>
 
         <p className="text-[10px] text-center text-gray-400">
-          By continuing, you agree to MarketHub's Terms of Service and Privacy Policy.
+          By continuing, you agree to The Market Hub's Terms of Service and Privacy Policy.
         </p>
       </div>
     );
@@ -321,14 +321,22 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
 
   useEffect(() => {
     async function testConnection() {
       try {
         await getDocFromServer(doc(db, 'test', 'connection'));
-      } catch (error) {
-        if (error instanceof Error && error.message.includes('the client is offline')) {
-          console.error("Please check your Firebase configuration. The client is offline.");
+        console.log("Firebase connection successful.");
+        setConnectionError(null);
+      } catch (error: any) {
+        console.error("Firebase Connection Test Failed:", error);
+        if (error.message?.includes('the client is offline')) {
+          const msg = "CRITICAL: The client is offline. This usually means the Firestore database has not been created in the Firebase Console for project 'themarkethub-8f1ed', or the API key/project ID is incorrect.";
+          console.error(msg);
+          setConnectionError(msg);
+        } else {
+          setConnectionError(error.message || "Unknown connection error");
         }
       }
     }
@@ -414,13 +422,28 @@ export default function App() {
             </div>
           )}
           <div className="min-h-screen bg-gray-50 flex flex-col pb-20 sm:pb-0">
+            {connectionError && (
+              <div className="bg-red-600 text-white p-3 text-center text-xs sm:text-sm font-medium sticky top-0 z-[100] animate-in fade-in slide-in-from-top duration-300">
+                <div className="max-w-7xl mx-auto flex items-center justify-center gap-2">
+                  <AlertCircle className="w-4 h-4 sm:w-5 h-5 shrink-0" />
+                  <span>{connectionError}</span>
+                  <button 
+                    onClick={() => window.location.reload()}
+                    className="ml-2 sm:ml-4 flex items-center gap-1 bg-white/20 hover:bg-white/30 px-2 py-1 rounded transition-colors font-bold"
+                  >
+                    <RefreshCw className="w-3 h-3 sm:w-4 h-4" />
+                    Retry
+                  </button>
+                </div>
+              </div>
+            )}
             <Navbar />
             <main className="flex-1 max-w-7xl mx-auto w-full p-4">
               {loading ? (
                 <div className="flex flex-col items-center justify-center p-20 space-y-6">
                   <div className="flex items-center gap-3 text-blue-600 text-3xl font-extrabold tracking-tight">
                     <ShoppingBag className="w-10 h-10" />
-                    MarketHub
+                    The Market Hub
                   </div>
                   <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-100 border-t-blue-600"></div>
                 </div>

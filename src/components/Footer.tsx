@@ -10,7 +10,7 @@ export default function Footer() {
           <div className="space-y-4">
             <Link to="/" className="flex items-center gap-2 text-2xl font-bold text-blue-600">
               <ShoppingBag className="w-8 h-8" />
-              <span>MarketHub</span>
+              <span>The Market Hub</span>
             </Link>
             <p className="text-gray-500 text-sm leading-relaxed">
               The world's most trusted marketplace for buying and selling everything from cars to electronics. Join our community today.
@@ -57,7 +57,7 @@ export default function Footer() {
 
         <div className="pt-8 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-gray-400 text-xs">
-            &copy; {new Date().getFullYear()} MarketHub Inc. All rights reserved.
+            &copy; {new Date().getFullYear()} The Market Hub Inc. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <Link to="/" className="text-gray-400 hover:text-gray-600 text-xs transition-colors">Privacy</Link>

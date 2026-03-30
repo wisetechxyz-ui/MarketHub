@@ -9,11 +9,11 @@ export default function PrivacyPolicyView() {
           <ShieldCheck className="w-8 h-8" />
         </div>
         <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight">
-          Privacy Policy – <span className="text-blue-600">MarketHub</span>
+          Privacy Policy – <span className="text-blue-600">The Market Hub</span>
         </h1>
         <div className="flex flex-col items-center gap-2 text-gray-500 font-medium">
           <p>Effective Date: [29/03/2026]</p>
-          <p>Platform Name: MarketHub</p>
+          <p>Platform Name: The Market Hub</p>
         </div>
       </div>
 
@@ -28,10 +28,10 @@ export default function PrivacyPolicyView() {
           </div>
           <div className="text-gray-600 leading-relaxed space-y-4">
             <p>
-              Welcome to MarketHub. Your privacy is important to us. This Privacy Policy explains how we collect, use, and protect your personal information when you use our platform.
+              Welcome to The Market Hub. Your privacy is important to us. This Privacy Policy explains how we collect, use, and protect your personal information when you use our platform.
             </p>
             <p className="font-medium text-gray-900">
-              By using MarketHub, you agree to the terms of this Privacy Policy.
+              By using The Market Hub, you agree to the terms of this Privacy Policy.
             </p>
           </div>
         </section>
@@ -134,7 +134,7 @@ export default function PrivacyPolicyView() {
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-gray-900">5. User Content</h2>
             <p className="text-gray-600 text-sm leading-relaxed">
-              Any listings, messages, or content you post on MarketHub may be visible to other users. Please avoid sharing sensitive personal information publicly.
+              Any listings, messages, or content you post on The Market Hub may be visible to other users. Please avoid sharing sensitive personal information publicly.
             </p>
           </section>
           <section className="space-y-3">
@@ -152,13 +152,13 @@ export default function PrivacyPolicyView() {
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-gray-900">8. Third-Party Links</h2>
             <p className="text-gray-600 text-sm leading-relaxed">
-              MarketHub may contain links to third-party websites. We are not responsible for their privacy practices.
+              The Market Hub may contain links to third-party websites. We are not responsible for their privacy practices.
             </p>
           </section>
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-gray-900">9. Children’s Privacy</h2>
             <p className="text-gray-600 text-sm leading-relaxed">
-              MarketHub is not intended for users under 18 years of age. We do not knowingly collect personal data from minors.
+              The Market Hub is not intended for users under 18 years of age. We do not knowingly collect personal data from minors.
             </p>
           </section>
           <section className="space-y-3">
@@ -188,7 +188,7 @@ export default function PrivacyPolicyView() {
       <div className="text-center pt-8">
         <div className="h-px bg-gray-200 w-24 mx-auto mb-8"></div>
         <p className="text-2xl font-bold text-gray-900">
-          MarketHub – <span className="text-blue-600 text-lg sm:text-2xl block sm:inline mt-2 sm:mt-0">Your Trusted Marketplace for Smart Buying & Easy Selling</span>
+          The Market Hub – <span className="text-blue-600 text-lg sm:text-2xl block sm:inline mt-2 sm:mt-0">Your Trusted Marketplace for Smart Buying & Easy Selling</span>
         </p>
       </div>
     </div>

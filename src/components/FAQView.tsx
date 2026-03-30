@@ -9,8 +9,8 @@ interface FAQItem {
 
 const FAQ_DATA: FAQItem[] = [
   {
-    question: "What is MarketHub?",
-    answer: "MarketHub is an online marketplace where users can buy and sell products easily. It connects buyers and sellers directly without any middleman.",
+    question: "What is The Market Hub?",
+    answer: "The Market Hub is an online marketplace where users can buy and sell products easily. It connects buyers and sellers directly without any middleman.",
     icon: ShoppingBag
   },
   {
@@ -19,12 +19,12 @@ const FAQ_DATA: FAQItem[] = [
     icon: UserPlus
   },
   {
-    question: "Is it free to use MarketHub?",
+    question: "Is it free to use The Market Hub?",
     answer: "Yes, basic usage like browsing and posting listings is free. However, some premium features (like promoted listings) may have charges.",
     icon: CreditCard
   },
   {
-    question: "How can I sell an item on MarketHub?",
+    question: "How can I sell an item on The Market Hub?",
     answer: [
       "Create an account",
       "Click on “Post Ad”",
@@ -40,17 +40,17 @@ const FAQ_DATA: FAQItem[] = [
     icon: MessageCircle
   },
   {
-    question: "Does MarketHub handle payments?",
-    answer: "MarketHub only connects buyers and sellers. Payments are handled directly between users unless otherwise specified.",
+    question: "Does The Market Hub handle payments?",
+    answer: "The Market Hub only connects buyers and sellers. Payments are handled directly between users unless otherwise specified.",
     icon: CreditCard
   },
   {
-    question: "Is MarketHub responsible for product quality?",
-    answer: "No. MarketHub does not own or verify products. Buyers should check product details carefully before purchasing.",
+    question: "Is The Market Hub responsible for product quality?",
+    answer: "No. The Market Hub does not own or verify products. Buyers should check product details carefully before purchasing.",
     icon: AlertTriangle
   },
   {
-    question: "How can I stay safe while using MarketHub?",
+    question: "How can I stay safe while using The Market Hub?",
     answer: [
       "Avoid advance payments to unknown sellers",
       "Meet in a safe public place",
@@ -80,7 +80,7 @@ const FAQ_DATA: FAQItem[] = [
     icon: TrendingUp
   },
   {
-    question: "Can I sell any product on MarketHub?",
+    question: "Can I sell any product on The Market Hub?",
     answer: "No. You cannot sell illegal, stolen, or restricted items. Please follow our listing guidelines.",
     icon: Ban
   },
@@ -90,7 +90,7 @@ const FAQ_DATA: FAQItem[] = [
     icon: UserMinus
   },
   {
-    question: "How can I contact MarketHub support?",
+    question: "How can I contact The Market Hub support?",
     answer: [
       "Email: sachinkamatxyz@gmail.com",
       "Support section in app/website"
@@ -116,10 +116,10 @@ export default function FAQView() {
           <HelpCircle className="w-8 h-8" />
         </div>
         <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight">
-          Frequently Asked Questions – <span className="text-blue-600">MarketHub</span>
+          Frequently Asked Questions – <span className="text-blue-600">The Market Hub</span>
         </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          Everything you need to know about buying and selling on MarketHub.
+          Everything you need to know about buying and selling on The Market Hub.
         </p>
       </div>
 
@@ -190,7 +190,7 @@ export default function FAQView() {
       <div className="text-center pt-8">
         <div className="h-px bg-gray-200 w-24 mx-auto mb-8"></div>
         <p className="text-2xl font-bold text-gray-900">
-          MarketHub – <span className="text-blue-600">Your Trusted Platform for Smart Buying & Easy Selling</span>
+          The Market Hub – <span className="text-blue-600">Your Trusted Platform for Smart Buying & Easy Selling</span>
         </p>
       </div>
     </div>

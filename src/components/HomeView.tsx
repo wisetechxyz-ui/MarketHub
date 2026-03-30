@@ -228,7 +228,7 @@ export default function HomeView() {
               <span className="text-blue-400">In One Place</span>
             </h1>
             <p className="text-sm sm:text-lg text-blue-100 max-w-md opacity-90">
-              Join millions of people buying and selling on MarketHub. The safest way to trade in your community.
+              Join millions of people buying and selling on The Market Hub. The safest way to trade in your community.
             </p>
           </div>
         </div>
